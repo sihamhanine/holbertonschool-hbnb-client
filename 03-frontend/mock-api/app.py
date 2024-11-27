@@ -1,15 +1,18 @@
-from uuid import uuid4
 from flask import Flask, request, jsonify
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from flask_cors import CORS
 import json
+import os
+from dotenv import load_dotenv
 
+# Load environment variables from .env file
+load_dotenv()
 
 app = Flask(__name__)
 app.config.from_object('config.Config')
 
 jwt = JWTManager(app)
-CORS(app) # Enable CORS for all routes
+CORS(app)  # Enable CORS for all routes
 
 with open('data/users.json') as f:
     users = json.load(f)
@@ -90,7 +93,7 @@ def add_review(place_id):
 
     review_text = request.json.get('review')
     new_review = {
-        "user_name": user['name'],
+        "user_name": user.get('name', 'Unknown User'),
         "rating": request.json.get('rating'),
         "comment": review_text,
         "place_id": place_id
@@ -100,4 +103,7 @@ def add_review(place_id):
     return jsonify({"msg": "Review added"}), 201
 
 if __name__ == '__main__':
+    # Print all available routes
+    for rule in app.url_map.iter_rules():
+        print(rule)
     app.run(debug=True)
